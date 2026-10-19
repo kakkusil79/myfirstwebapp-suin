@@ -14,6 +14,11 @@
   --color-grade-b: #a15c00;
   --color-grade-c: #b42318;
 
+  /* 아이와 보기(/kids) — kid-sun · kid-leaf는 그림에만(글자 색으로 쓰지 않는다), kid-sky는 카드 바탕 면 */
+  --color-kid-sun: #f5c542;
+  --color-kid-leaf: #5aa469;
+  --color-kid-sky: #e8f3fc;
+
   --font-sans: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
