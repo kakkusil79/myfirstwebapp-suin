@@ -40,5 +40,10 @@ model Review {
   reviewer  String
   createdAt DateTime @default(now())
 
+  // 총무부 도장(5일차 자유 퀘스트) — 찍기 전에는 비어 있다
+  paymentStatus    String?
+  financeChecker   String?
+  paymentCheckedAt DateTime?
+
   @@index([buyerId])
 }

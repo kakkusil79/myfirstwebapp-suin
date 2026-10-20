@@ -3,10 +3,12 @@ import BlockBuddy from "@/components/BlockBuddy";
 import DataTable, { type Column } from "@/components/DataTable";
 import GradeFace, { FACE_NAME, FaceIcon } from "@/components/GradeFace";
 import PageHeader from "@/components/PageHeader";
+import PaymentMascot from "@/components/PaymentMascot";
 import TowerGame, { type GameCard } from "@/components/TowerGame";
 import { getBuyers, type Grade } from "@/lib/buyers";
 import { byRegion, filterByGrade, gradeCounts, kpis, parseGrade } from "@/lib/metrics";
-import { int, pct, usd } from "@/lib/format";
+import { int, kst, pct, usd } from "@/lib/format";
+import { getLatestPayments, PAYMENT_STYLE } from "@/lib/reviews";
 
 // 아이와 보기 — /buyers와 같은 계산(lib/metrics) · 같은 숫자를 얼굴 · 블록 친구로 보여 준다.
 export const metadata = { title: "아이와 보기" };
@@ -30,6 +32,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ g
   const grade = parseGrade(Array.isArray(raw) ? raw[0] : raw);
 
   const buyers = await getBuyers();
+  const payments = await getLatestPayments(12);
   const k = kpis(buyers);
   const counts = gradeCounts(buyers);
   const regions = byRegion(buyers);
@@ -72,6 +75,42 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ g
             </li>
           ))}
         </ul>
+      </section>
+
+      <section aria-labelledby="payments" className="space-y-3">
+        <h2 id="payments" className="text-lg font-semibold text-ink">
+          입금 소식
+        </h2>
+        <p className="text-sm text-muted">
+          총무부 어른이 입금을 확인하면 천사가 날개를 펴고, 아직 안 들어왔으면 꼬마 악마가 펑! 터져요. 바이어마다 가장
+          최근 도장 하나씩이에요.
+        </p>
+        {payments.length === 0 ? (
+          <p className="text-sm text-muted">아직 총무부 도장이 없어요</p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {payments.map((p) => (
+              <li key={p.id} className="flex items-center gap-3 rounded-lg border border-line bg-kid-sky p-3">
+                <PaymentMascot status={p.paymentStatus ?? ""} size={72} />
+                <div className="min-w-0">
+                  <Link href={`/buyers/${p.buyerId}`} className="inline-flex min-h-11 items-center text-accent hover:underline">
+                    {p.buyer.name}
+                  </Link>
+                  <span className="num block text-xs text-muted">{p.buyerId}</span>
+                  <span
+                    className={`mt-1 inline-flex items-center rounded border bg-bg px-1.5 text-sm font-semibold ${PAYMENT_STYLE[p.paymentStatus ?? ""] ?? "border-line text-muted"}`}
+                  >
+                    {p.paymentStatus === "입금 확인" ? "입금 확인 · 천사" : "미입금 · 꼬마 악마"}
+                  </span>
+                  <p className="mt-1 text-sm text-muted">
+                    총무부 {p.financeChecker ?? "—"} ·{" "}
+                    <span className="num">{p.paymentCheckedAt ? kst(p.paymentCheckedAt) : "—"}</span>
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section aria-labelledby="world" className="space-y-3">

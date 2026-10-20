@@ -24,3 +24,22 @@ export async function getRecentReviews(take = 5) {
     include: { buyer: { select: { name: true } } },
   });
 }
+
+// 총무부 도장(자유 퀘스트) — 입금 확인이면 천사, 미입금이면 꼬마 악마
+export const PAYMENT_STATUSES = ["입금 확인", "미입금"] as const;
+
+export const PAYMENT_STYLE: Record<string, string> = {
+  "입금 확인": "border-grade-s text-grade-s",
+  미입금: "border-warn text-warn",
+};
+
+/** 바이어마다 가장 최근에 찍은 도장 하나씩(최근 도장이 위) */
+export async function getLatestPayments(take = 12) {
+  const stamped = await db().review.findMany({
+    where: { paymentStatus: { not: null } },
+    orderBy: [{ paymentCheckedAt: "desc" }, { id: "desc" }],
+    include: { buyer: { select: { name: true } } },
+  });
+  const seen = new Set<string>();
+  return stamped.filter((r) => !seen.has(r.buyerId) && seen.add(r.buyerId)).slice(0, take);
+}

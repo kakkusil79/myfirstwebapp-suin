@@ -38,3 +38,125 @@ body {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* 총무부 도장 그림(components/PaymentMascot) — 한 번만 움직인다.
+   천사: 떠오르며 날개를 편다 · 꼬마 악마: 부들부들 부풀다 펑! 터지고 연기만 남는다 */
+.mascot * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.mascot-play .angel-body {
+  animation: angel-rise 1.2s ease-out both;
+}
+.mascot-play .wing-l {
+  transform-origin: right bottom;
+  animation: wing-left 0.9s ease-out 0.2s both;
+}
+.mascot-play .wing-r {
+  transform-origin: left bottom;
+  animation: wing-right 0.9s ease-out 0.2s both;
+}
+.mascot-play .angel-halo {
+  animation: halo-glow 1.2s ease-in-out 0.9s 2;
+}
+.mascot-play .devil-body {
+  animation: devil-swell 1.2s ease-in both;
+}
+.mascot-play .devil-burst {
+  animation: devil-burst 1.4s ease-out both;
+}
+.mascot-play .devil-smoke {
+  animation: devil-smoke 1.8s ease-out both;
+}
+@keyframes angel-rise {
+  from {
+    transform: translateY(12px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes wing-left {
+  from {
+    transform: rotate(55deg) scale(0.6);
+  }
+  70% {
+    transform: rotate(-8deg) scale(1.05);
+  }
+  to {
+    transform: rotate(0) scale(1);
+  }
+}
+@keyframes wing-right {
+  from {
+    transform: rotate(-55deg) scale(0.6);
+  }
+  70% {
+    transform: rotate(8deg) scale(1.05);
+  }
+  to {
+    transform: rotate(0) scale(1);
+  }
+}
+@keyframes halo-glow {
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes devil-swell {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.05) rotate(-6deg);
+  }
+  40% {
+    transform: scale(1.12) rotate(6deg);
+  }
+  60% {
+    transform: scale(1.2) rotate(-6deg);
+  }
+  72% {
+    transform: scale(1.3) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+@keyframes devil-burst {
+  0%,
+  60% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  85% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+@keyframes devil-smoke {
+  0%,
+  50% {
+    transform: translateY(0) scale(0.3);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-6px) scale(1);
+    opacity: 0.9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mascot-play * {
+    animation: none !important;
+  }
+}

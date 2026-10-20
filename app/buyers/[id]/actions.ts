@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { StampState } from "@/components/PaymentStamp";
 import type { ReviewState } from "@/components/ReviewForm";
 import { db } from "@/lib/db";
-import { REVIEW_STATUSES } from "@/lib/reviews";
+import { PAYMENT_STATUSES, REVIEW_STATUSES } from "@/lib/reviews";
 
 // 확인 기록 쓰기(서버 액션). 검사는 여기서 한다 — 브라우저 검사는 건너뛸 수 있다.
 // 처음 걸린 하나만 돌려주고 저장하지 않는다.
@@ -31,4 +32,34 @@ export async function addReview(prev: ReviewState, formData: FormData): Promise<
   revalidatePath(`/buyers/${buyerId}`);
   revalidatePath("/");
   return { ok: true, message: "저장했습니다 — 새로 고쳐도 남아 있습니다" };
+}
+
+// 총무부 도장(자유 퀘스트) — 이미 남은 확인 기록 하나에 입금 여부 · 확인자 · 시각을 적는다(다시 찍으면 덮어쓴다).
+export async function stampPayment(prev: StampState, formData: FormData): Promise<StampState> {
+  const reviewId = Number(formData.get("reviewId"));
+  const buyerId = String(formData.get("buyerId") ?? "").trim();
+  const payment = String(formData.get("payment") ?? "").trim();
+  const checker = String(formData.get("checker") ?? "").trim();
+
+  const fail = (message: string): StampState => ({ ok: false, message, payment: "" });
+  if (!(PAYMENT_STATUSES as readonly string[]).includes(payment)) return fail("입금 여부를 골라 주세요");
+  if (!checker) return fail("총무부 확인자(별명)를 적어 주세요");
+  if (checker.length > 20) return fail("별명은 20자 이내로 적어 주세요");
+
+  try {
+    const review = Number.isInteger(reviewId)
+      ? await db().review.findFirst({ where: { id: reviewId, buyerId }, select: { id: true } })
+      : null;
+    if (!review) return fail("확인 기록을 찾을 수 없습니다");
+    await db().review.update({
+      where: { id: review.id },
+      data: { paymentStatus: payment, financeChecker: checker, paymentCheckedAt: new Date() },
+    });
+  } catch {
+    return fail("저장하지 못했습니다 — 잠시 뒤 다시 눌러 주세요");
+  }
+
+  revalidatePath(`/buyers/${buyerId}`);
+  revalidatePath("/kids");
+  return { ok: true, message: `도장을 찍었습니다 — ${payment}`, payment };
 }

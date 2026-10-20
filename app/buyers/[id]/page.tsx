@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import GradeBadge from "@/components/GradeBadge";
 import PageHeader from "@/components/PageHeader";
+import PaymentStamp from "@/components/PaymentStamp";
 import ReviewForm from "@/components/ReviewForm";
 import { getBuyer } from "@/lib/buyers";
 import { int, kst, pct, usd } from "@/lib/format";
@@ -89,6 +90,19 @@ export default async function Page({ params }: Props) {
                 <p className="mt-1 text-sm text-muted">
                   {r.reviewer} · <span className="num">{kst(r.createdAt)}</span>
                 </p>
+                <PaymentStamp
+                  reviewId={r.id}
+                  buyerId={b.id}
+                  current={
+                    r.paymentStatus
+                      ? {
+                          status: r.paymentStatus,
+                          checker: r.financeChecker ?? "—",
+                          at: r.paymentCheckedAt ? kst(r.paymentCheckedAt) : "—",
+                        }
+                      : null
+                  }
+                />
               </li>
             ))}
           </ul>
