@@ -1,7 +1,7 @@
-import data from "@/data/buyers.json";
+import { db } from "@/lib/db";
 
-// 바이어 데이터 읽기. 지금은 data/buyers.json을 그대로 돌려준다.
-// async로 둔다 — 5일차에 DB로 바꿀 때 아래 두 함수의 속만 바뀐다.
+// 바이어 데이터 읽기. 5일차부터 Supabase DB의 Buyer 표에서 읽는다(서버 전용).
+// 함수 이름 · 인자 · 돌려주는 모양은 4일차 그대로 — 쪽과 lib/metrics는 바뀌지 않는다.
 export type Grade = "S" | "A" | "B" | "C";
 
 export type Buyer = {
@@ -23,13 +23,11 @@ export type Buyer = {
   signals: string[];
 };
 
-const BUYERS = data as Buyer[];
-
+// DB의 grade 칸은 글자(String)라 Grade 형으로 맞춘다 — 값은 seed가 넣은 S · A · B · C 그대로.
 export async function getBuyers(): Promise<Buyer[]> {
-  return BUYERS;
+  return (await db().buyer.findMany({ orderBy: { id: "asc" } })) as Buyer[];
 }
 
 export async function getBuyer(id: string): Promise<Buyer | null> {
-  const key = id.toUpperCase();
-  return BUYERS.find((b) => b.id === key) ?? null;
+  return (await db().buyer.findUnique({ where: { id: id.toUpperCase() } })) as Buyer | null;
 }
